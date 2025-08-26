@@ -1,0 +1,7 @@
+CREATE TABLE headlines (
+	id SERIAL PRIMARY KEY,
+	source TEXT,
+	headline TEXT,
+	url TEXT,
+	scraped TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
