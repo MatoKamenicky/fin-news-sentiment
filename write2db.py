@@ -3,6 +3,7 @@ from datetime import datetime
 import re
 import pandas as pd
 
+# Database connection
 def db_conn():
     conn = psycopg2.connect(
                 user="postgres",
@@ -13,12 +14,14 @@ def db_conn():
                 )
     return conn
 
+# Read from the database
 def read_db(query):
     conn = db_conn()
     df = pd.read_sql(query, conn)
 
     return df
 
+# Write sentiment analysis results to the database
 def sentiment2db(df):
     conn = db_conn()
     cursor = conn.cursor()
@@ -37,7 +40,7 @@ def sentiment2db(df):
     conn.close()
     print("PostgreSQL connection is closed")
 
-
+# Insert headlines into the database
 def headlines2db(url,headlines):
     conn = None
     try:

@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import write2db as db
 
+
+# Headers for HTTP requests
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                   "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -15,11 +17,13 @@ headers = {
     "Connection": "keep-alive",
 }
 
+# Fetch a single page
 async def get_page(session, url):
     async with session.get(url) as r:
 
         return await r.text()
-    
+
+# Fetch all pages
 async def get_all(session, urls):
     tasks = []
     for url in urls:
@@ -35,6 +39,7 @@ async def main(urls):
 
         return data
 
+# Extract headlines from the HTML
 def extract_headlines(soup):
     headlines = []
 
@@ -55,6 +60,7 @@ def extract_headlines(soup):
 
     return headlines
 
+# Parse the HTML and extract headlines
 def parse(urls, htmls):
     result = {}
     for url, html in zip(urls, htmls):
