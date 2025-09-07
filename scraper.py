@@ -71,7 +71,7 @@ def parse(urls, htmls):
     return result
    
 
-if __name__ == "__main__":
+def run():
     urls = [
         "https://www.ft.com/",
         "https://www.investing.com",
@@ -87,5 +87,8 @@ if __name__ == "__main__":
             print(f"{i}. {h}")
         print(f"Total number of headlines: {len(headlines)}")
         db.headlines2db(url, headlines)
+
+if __name__ == "__main__":
+    run()
 
             

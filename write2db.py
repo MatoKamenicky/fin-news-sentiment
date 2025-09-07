@@ -2,16 +2,22 @@ import psycopg2
 from datetime import datetime
 import re
 import pandas as pd
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Database connection
 def db_conn():
-    conn = psycopg2.connect(
-                user="postgres",
-                password="postgres",
-                host="localhost",
-                port="5432",
-                dbname="newsdb"
-                )
+    # conn = psycopg2.connect(
+    #             user=os.getenv("POSTGRES_USER"),
+    #             password=os.getenv("POSTGRES_PASSWORD"),
+    #             host=os.getenv("POSTGRES_HOST"),
+    #             port=os.getenv("POSTGRES_PORT"),
+    #             dbname=os.getenv("POSTGRES_DB")
+    #             )
+
+    conn = psycopg2.connect(os.getenv("DATABASE_URL"))
     return conn
 
 # Read from the database
