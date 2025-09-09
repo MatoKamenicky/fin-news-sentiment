@@ -24,6 +24,10 @@ df['Datetime_6h'] = df['scraped'].dt.floor('6H')
 # Group by 6-hour intervals
 six_hour_sentiment = (df.groupby('Datetime_6h')['sentiment_score'].mean().reset_index())
 six_hour_sentiment.columns = ['Datetime_6h', 'avg_sentiment_score']
+market_sentiment = six_hour_sentiment[
+    (six_hour_sentiment['Datetime_6h'].dt.hour >= 9) &
+    (six_hour_sentiment['Datetime_6h'].dt.hour < 16)
+]
 
 # Merge with S&P 500 data
 sp500_6h['Datetime_6h'] = sp500_6h['Datetime_6h'].dt.tz_convert(None)
@@ -31,14 +35,29 @@ sp500_6h['Datetime_6h'] = sp500_6h['Datetime_6h'].dt.tz_convert(None)
 
 
 # ------------------Streamlit layout---------------------------------------------
+st.markdown("""
+    <style>
+    .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        max-width: 1200px;
+        margin: auto;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+# Page title and subtitle
 st.title("📈 Financial News Sentiment")
 st.subheader("Realtime sentiment, market trends, and actionable insights")
 
 # --------------------------------------------------------------------------------
 
+# --------------------------------------------------------------------------------
+
 # Calculate metrics
 latest_sp500 = sp500_hist['Close'].iloc[-1]
-avg_sentiment_24h = six_hour_sentiment['avg_sentiment_score'].tail(4).mean()  # last 24h = 4 x 6h bins
+avg_sentiment_24h = six_hour_sentiment['avg_sentiment_score'].tail(4).mean() 
 headlines_today = df[df['scraped'].dt.date == pd.Timestamp.today().date()].shape[0]
 sentiment_volatility = six_hour_sentiment['avg_sentiment_score'].tail(4).std()
 sentiment_trend = (six_hour_sentiment['avg_sentiment_score'].iloc[-1] - six_hour_sentiment['avg_sentiment_score'].iloc[-5]) / abs(six_hour_sentiment['avg_sentiment_score'].iloc[-5]) * 100
@@ -53,6 +72,17 @@ col4.metric("Sentiment Volatility", f"{sentiment_volatility:.2f}", delta=f"{sent
 
 # --------------------------------------------------------------------------------
 
+# AI Insights
+st.header("AI Insights")
+
+
+# --- 3. Correlation with S&P500 ---
+if six_hour_sentiment['avg_sentiment_score'].notna().sum() > 5 and sp500_hist['Close'].notna().sum() > 5:
+    corr = six_hour_sentiment['avg_sentiment_score'].corr(sp500_hist['Close'])
+    st.info(f"📊 Correlation between sentiment & S&P500 (last {len(sp500_hist)} bins): {corr:.2f}")
+
+# --------------------------------------------------------------------------------
+
 # Sentiment Distribution
 sentiment_counts = df['sentiment'].value_counts().reset_index()
 sentiment_counts.columns = ["sentiment", "count"]
@@ -64,7 +94,7 @@ st.plotly_chart(fig)
 # --------------------------------------------------------------------------------
 
 # Plot scraped data
-fig = px.line(six_hour_sentiment, x='Datetime_6h', y='avg_sentiment_score', title='Average Sentiment (6-hour intervals)', markers=True)
+fig = px.line(market_sentiment, x='Datetime_6h', y='avg_sentiment_score', title='Average Sentiment (6-hour intervals)', markers=True)
 st.plotly_chart(fig)
 
 # Plot S&P 500
