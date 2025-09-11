@@ -5,7 +5,7 @@ import nltk
 
 def run():
     # DB connection
-    query = 'SELECT id, source, headline, scraped FROM headlines WHERE sentiment IS NULL;'
+    query = 'SELECT id, source, headline, scraped FROM headlines_market_hours WHERE sentiment IS NULL;'
 
     df = db.read_db(query)
 

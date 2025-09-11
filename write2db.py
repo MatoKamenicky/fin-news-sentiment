@@ -26,7 +26,7 @@ def sentiment2db(df):
 
     for index, row in df.iterrows():
         update_query = """
-            UPDATE headlines
+            UPDATE headlines_market_hours
             SET sentiment_score=%s, sentiment=%s
             WHERE id = %s;
         """
@@ -57,7 +57,7 @@ def headlines2db(url,headlines):
 
         for h in headlines:
             query = """
-                    INSERT INTO headlines(source, headline, url, scraped)
+                    INSERT INTO headlines_market_hours(source, headline, url, scraped)
                     VALUES (%s, %s, %s, %s)
                     ON CONFLICT (source, headline) DO NOTHING;
                     """

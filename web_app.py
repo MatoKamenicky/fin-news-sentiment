@@ -6,7 +6,7 @@ import yfinance as yf
 import plotly.graph_objects as go
 
 # Data from DB
-query = 'SELECT id, source, headline, sentiment, sentiment_score, scraped FROM headlines;'
+query = 'SELECT id, source, headline, sentiment, sentiment_score, scraped FROM headlines_market_hours;'
 df = db.read_db(query)
 
 # Stock market data
