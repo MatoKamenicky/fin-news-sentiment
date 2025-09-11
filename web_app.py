@@ -55,6 +55,18 @@ st.markdown( """
        </style>
        """, unsafe_allow_html=True)
 
+st.markdown("""
+    <style>
+    /* Card padding & color */
+    .stMetric {
+        background-color: #1E1E1E;
+        border-radius: 10px;
+        padding: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
 # Page title and subtitle
 st.title("📈 Financial News Sentiment")
 st.subheader("Realtime sentiment, market trends, and actionable insights")
