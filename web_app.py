@@ -35,6 +35,8 @@ sp500_6h['Datetime_6h'] = sp500_6h['Datetime_6h'].dt.tz_convert(None)
 
 
 # ------------------Streamlit layout---------------------------------------------
+st.set_page_config(page_title="Financial News Sentiment", layout="wide")
+
 st.markdown("""
     <style>
     .block-container {
@@ -46,6 +48,12 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+st.markdown( """
+       <style>
+       #MainMenu {visibility: hidden; }
+       footer {visibility: hidden;}
+       </style>
+       """, unsafe_allow_html=True)
 
 # Page title and subtitle
 st.title("📈 Financial News Sentiment")
