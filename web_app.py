@@ -16,6 +16,49 @@ sp500_hist = sp500.history(period="1d", interval="1h").reset_index()
 
 
 df['scraped_time_rounded'] = df['scraped'].dt.floor('10min')
+
+# -------------------------------- Sidebar -------------------------------- 
+st.sidebar.title("🔍 Filters")
+
+# Source filter
+sources = st.sidebar.multiselect(
+    "Select News Sources",
+    options=df["source"].unique(),
+    default=df["source"].unique()
+)
+
+# Sentiment filter
+sentiments = st.sidebar.multiselect(
+    "Select Sentiments",
+    options=df["sentiment"].unique(),
+    default=df["sentiment"].unique()
+)
+
+# Date range filter
+date_min, date_max = df["scraped"].min(), df["scraped"].max()
+date_range = st.sidebar.date_input("Date Range", [date_min, date_max])
+
+# Convert date inputs to Timestamps
+start_date = pd.to_datetime(date_range[0])
+end_date = pd.to_datetime(date_range[1])
+
+# Apply filters
+mask = (
+    df["source"].isin(sources)
+    & df["sentiment"].isin(sentiments)
+    & (df["scraped"] >= start_date)
+    & (df["scraped"] <= end_date)
+)
+df_filtered = df[mask]
+df = df_filtered.copy()
+
+
+
+# --------------------------------------------------------------------------------------
+
+
+
+# Aggregate sentiment scores over time
 market_sentiment = df.groupby('scraped_time_rounded')['sentiment_score'].mean().reset_index()
 market_sentiment.columns = ['scraped_time', 'avg_sentiment_score']
 
@@ -103,9 +146,9 @@ if market_sentiment['avg_sentiment_score'].notna().sum() > 5 and sp500_hist['Clo
 sentiment_counts = df['sentiment'].value_counts().reset_index()
 sentiment_counts.columns = ["sentiment", "count"]
 
-fig = px.pie(sentiment_counts, values="count", names="sentiment", 
+fig_pie = px.pie(sentiment_counts, values="count", names="sentiment", 
              color="sentiment", title="Overall Sentiment")
-st.plotly_chart(fig)
+# st.plotly_chart(fig)
 
 # --------------------------------------------------------------------------------
 
@@ -118,7 +161,26 @@ fig = px.line(sp500_hist, x="Datetime", y="Close", title="S&P500 Closing Price (
 st.plotly_chart(fig)
 
 # --------------------------------------------------------------------------------
+sentiment_by_source = df_filtered.groupby("source")["sentiment_score"].mean().reset_index()
+fig_source = px.bar(
+    sentiment_by_source, x="source", y="sentiment_score",
+    title="📑 Average Sentiment by Source",
+    color="sentiment_score", color_continuous_scale="RdYlGn"
+)
+
+col1, col2 = st.columns(2)
+with col1:
+    st.plotly_chart(fig_pie, use_container_width=True) 
+with col2:
+    st.plotly_chart(fig_source, use_container_width=True)
 
 # Latest Headlines
-st.subheader("Latest Headlines")
-st.dataframe(df[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']].sort_values("scraped", ascending=False))
+# st.subheader("Latest Headlines")
+# st.dataframe(df[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']].sort_values("scraped", ascending=False))
+
+st.subheader("📰 Latest Headlines")
+st.dataframe(
+    df_filtered[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']]
+    .sort_values("scraped", ascending=False)
+    .style.applymap(lambda v: "color: green;" if v=="positive" else "color: red;" if v=="negative" else "color: gray;", subset=["sentiment"])
+)
