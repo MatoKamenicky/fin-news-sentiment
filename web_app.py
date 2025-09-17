@@ -14,9 +14,9 @@ sp500 = yf.Ticker("^GSPC")
 sp500_hist = sp500.history(period="1d", interval="1h").reset_index()
 
 
-
+df['scraped'] = pd.to_datetime(df['scraped'], errors='coerce')
 df['scraped_time_rounded'] = df['scraped'].dt.floor('10min')
-
+df['scraped_time_rounded'] = df['scraped_time_rounded'] + pd.Timedelta(hours=6)
 # -------------------------------- Sidebar -------------------------------- 
 st.sidebar.title("🔍 Filters")
 
@@ -35,7 +35,7 @@ sentiments = st.sidebar.multiselect(
 )
 
 # Date range filter
-date_min, date_max = df["scraped"].min(), df["scraped"].max()
+date_min, date_max = df["scraped_time_rounded"].min(), df["scraped_time_rounded"].max()
 date_range = st.sidebar.date_input("Date Range", [date_min, date_max])
 
 # Convert date inputs to Timestamps
@@ -46,12 +46,11 @@ end_date = pd.to_datetime(date_range[1])
 mask = (
     df["source"].isin(sources)
     & df["sentiment"].isin(sentiments)
-    & (df["scraped"] >= start_date)
-    & (df["scraped"] <= end_date)
+    & (df["scraped_time_rounded"] >= start_date)
+    & (df["scraped_time_rounded"] <= end_date)
 )
 df_filtered = df[mask]
 df = df_filtered.copy()
-
 
 
 # --------------------------------------------------------------------------------------
@@ -135,7 +134,7 @@ col4.metric("Sentiment Volatility", volatility_display, delta=trend_display)
 st.header("AI Insights")
 
 
-# --- 3. Correlation with S&P500 ---
+# Correlation with S&P500
 if market_sentiment['avg_sentiment_score'].notna().sum() > 5 and sp500_hist['Close'].notna().sum() > 5:
     corr = market_sentiment['avg_sentiment_score'].corr(sp500_hist['Close'])
     st.info(f"📊 Correlation between sentiment & S&P500 (last {len(sp500_hist)} bins): {corr:.2f}")
@@ -161,6 +160,20 @@ fig = px.line(sp500_hist, x="Datetime", y="Close", title="S&P500 Closing Price (
 st.plotly_chart(fig)
 
 # --------------------------------------------------------------------------------
+
+
+# Combined Sentiment and S&P500 Plot
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=market_sentiment["scraped_time"], y=market_sentiment["avg_sentiment_score"],
+                         mode="lines+markers", name="Avg Sentiment"))
+fig.add_trace(go.Scatter(x=sp500_hist["Datetime"], y=sp500_hist["Close"],
+                         mode="lines", name="S&P500 Close", yaxis="y2"))
+
+fig.update_layout(title="Sentiment vs S&P500", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title="S&P500 Close", overlaying="y", side="right"))
+st.plotly_chart(fig, use_container_width=True)
+# --------------------------------------------------------------------------------
+
+
 sentiment_by_source = df_filtered.groupby("source")["sentiment_score"].mean().reset_index()
 fig_source = px.bar(
     sentiment_by_source, x="source", y="sentiment_score",
