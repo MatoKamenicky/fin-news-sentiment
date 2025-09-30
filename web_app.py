@@ -51,9 +51,7 @@ st.markdown("""
 query = 'SELECT id, source, headline, sentiment, sentiment_score, scraped FROM headlines_market_hours;'
 df = db.read_db(query)
 
-# Stock market data
-sp500 = yf.Ticker("^GSPC")
-sp500_hist = sp500.history(period="1mo", interval="1h").reset_index()
+
 
 df['scraped'] = pd.to_datetime(df['scraped'], errors='coerce')
 df['scraped_time_rounded'] = df['scraped'].dt.floor('10min')
@@ -91,6 +89,19 @@ elif  len(date_range) == 1:
     start_date = pd.to_datetime(date_range[0]).tz_localize("America/New_York")
     end_date   = pd.to_datetime(date_range[0]).tz_localize("America/New_York") + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
 
+# Ticker selection
+default_tickers = ["^GSPC", "QQQ", "SPY", "DIA", "AAPL", "MSFT"]
+
+selected_ticker = st.sidebar.selectbox(
+    "Select Stock / ETF to Compare",
+    options=default_tickers,
+    index=0 
+)
+
+# Load chosen ticker data
+ticker = yf.Ticker(selected_ticker)
+stock_hist = ticker.history(period="1mo", interval="1h").reset_index()
+
 
 mask = (
     df["source"].isin(sources)
@@ -99,15 +110,17 @@ mask = (
     & (df["scraped_time_rounded"] <= end_date)
 )
 
-sp500_hist = sp500_hist[
-    (sp500_hist["Datetime"] >= start_date) & 
-    (sp500_hist["Datetime"] <= end_date)
+stock_hist = stock_hist[
+    (stock_hist["Datetime"] >= start_date) & 
+    (stock_hist["Datetime"] <= end_date)
 ]
-
-
 
 df_filtered = df[mask]
 df = df_filtered.copy()
+
+
+
+
 # --------------------------------------------------------------------------------------
 
 
@@ -125,10 +138,10 @@ st.subheader("Realtime sentiment, market trends, and actionable insights")
 
 
 # Calculate metrics
-if not sp500_hist.empty:
-    latest_sp500 = sp500_hist['Close'].iloc[-1]
+if not stock_hist.empty:
+    latest_stock = stock_hist['Close'].iloc[-1]
 else:
-    latest_sp500 = float("nan")
+    latest_stock = float("nan")
 headlines_today = df[df['scraped'].dt.date == pd.Timestamp.today().date()].shape[0]
 sentiment_24h = market_sentiment.set_index("scraped_time").last("24H")
 avg_sentiment_24h = sentiment_24h["avg_sentiment_score"].mean()
@@ -145,7 +158,7 @@ else:
 # Display summary cards
 st.header("Summary")
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Latest S&P500 Close", f"{latest_sp500:.2f}")
+col1.metric("Latest Stock Close", f"{latest_stock:.2f}")
 col2.metric("Average Sentiment (24h)", f"{avg_sentiment_24h:.2f}")
 col3.metric("Headlines Today", headlines_today)
 
@@ -154,7 +167,6 @@ trend_display = f"{sentiment_trend:.1f}%" if sentiment_trend is not None else "N
 volatility_display = f"{sentiment_volatility:.2f}" if sentiment_volatility is not None else "N/A"
 
 col4.metric("Sentiment Volatility", volatility_display, delta=trend_display)
-# col4.metric("Sentiment Volatility", f"{sentiment_volatility:.2f}", delta=f"{sentiment_trend:.1f}%")
 
 # --------------------------------------------------------------------------------
 
@@ -162,10 +174,10 @@ col4.metric("Sentiment Volatility", volatility_display, delta=trend_display)
 st.header("AI Insights")
 
 
-# Correlation with S&P500
-if market_sentiment['avg_sentiment_score'].notna().sum() > 5 and sp500_hist['Close'].notna().sum() > 5:
-    corr = market_sentiment['avg_sentiment_score'].corr(sp500_hist['Close'])
-    st.info(f"📊 Correlation between sentiment & S&P500 (last {len(sp500_hist)} bins): {corr:.2f}")
+# Correlation with Selected Stock
+if market_sentiment['avg_sentiment_score'].notna().sum() > 5 and stock_hist['Close'].notna().sum() > 5:
+    corr = market_sentiment['avg_sentiment_score'].corr(stock_hist['Close'])
+    st.info(f"📊 Correlation between sentiment & {selected_ticker} (last {len(stock_hist)} bins): {corr:.2f}")
 
 # --------------------------------------------------------------------------------
 
@@ -184,22 +196,22 @@ fig = px.line(market_sentiment, x='scraped_time', y='avg_sentiment_score', title
 fig.update_traces(line=dict(color="#BB33FF"))
 st.plotly_chart(fig)
 
-# Plot S&P 500
-fig = px.line(sp500_hist, x="Datetime", y="Close", title="S&P500 Closing Price", markers=True)
+# Plot Selected Stock
+fig = px.line(stock_hist, x="Datetime", y="Close", title=f"{selected_ticker} Closing Price", markers=True)
 fig.update_traces(line=dict(color="#0077FF"))
 st.plotly_chart(fig)
 
 # --------------------------------------------------------------------------------
 
 
-# Combined Sentiment and S&P500 Plot
+# Combined Sentiment and Selected Stock Plot
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=market_sentiment["scraped_time"], y=market_sentiment["avg_sentiment_score"],
                          mode="lines+markers", name="Avg Sentiment", line=dict(color="#BB33FF")))
-fig.add_trace(go.Scatter(x=sp500_hist["Datetime"], y=sp500_hist["Close"],
-                         mode="lines+markers", name="S&P500 Close", yaxis="y2", line=dict(color="#0077FF")))
+fig.add_trace(go.Scatter(x=stock_hist["Datetime"], y=stock_hist["Close"],
+                         mode="lines+markers", name=f"{selected_ticker} Close", yaxis="y2", line=dict(color="#0077FF")))
 
-fig.update_layout(title="Sentiment vs S&P500", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title="S&P500 Close", overlaying="y", side="right"))
+fig.update_layout(title=f"Sentiment vs {selected_ticker}", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title=f"{selected_ticker} Close", overlaying="y", side="right"))
 st.plotly_chart(fig, use_container_width=True)
 # --------------------------------------------------------------------------------
 
@@ -218,9 +230,6 @@ with col2:
     st.plotly_chart(fig_source, use_container_width=True)
 
 # Latest Headlines
-# st.subheader("Latest Headlines")
-# st.dataframe(df[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']].sort_values("scraped", ascending=False))
-
 st.subheader("📰 Latest Headlines")
 st.dataframe(
     df_filtered[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']]
