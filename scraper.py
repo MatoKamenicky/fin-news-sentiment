@@ -53,8 +53,29 @@ def extract_headlines(soup):
         if txt and len(txt.split()) > 6 and txt not in headlines:  
             headlines.append(txt)
 
-    for span in soup.select("span.text.text"):
+    for span in soup.select("span.text.text, span.link__wrapper"):
         txt = span.get_text(strip=True)
+        if txt and len(txt.split()) > 6 and txt not in headlines:
+            headlines.append(txt)
+
+    for span in soup.find_all("span"):
+        txt = span.get_text(strip=True)
+
+        if not txt:
+            continue
+        if len(txt.split()) <= 6:
+            continue
+        if txt in headlines: 
+            continue
+
+        bad_words = ["subscribe", "sign in", "menu", "login", "cookie"]
+        if any(bad in txt.lower() for bad in bad_words):
+            continue
+
+        headlines.append(txt)
+    
+    for div in soup.find_all("div", class_=lambda c: c and "headline" in c.lower()):
+        txt = div.get_text(strip=True)
         if txt and len(txt.split()) > 6 and txt not in headlines:
             headlines.append(txt)
 
@@ -75,7 +96,13 @@ def run():
     urls = [
         "https://www.ft.com/",
         "https://www.investing.com",
-        "https://www.morningstar.com/"
+        "https://www.morningstar.com/",
+        "https://www.bloomberg.com/",
+        "https://www.theguardian.com/uk/business",
+        "https://www.wsj.com/finance",
+        "https://www.marketwatch.com/",
+        "https://www.reuters.com/business/finance/",
+        "https://www.investopedia.com/"
     ]
   
     results = asyncio.run(main(urls))
