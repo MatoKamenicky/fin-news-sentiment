@@ -45,6 +45,24 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
+# Page title and subtitle
+intro_html = """
+<div style="background: linear-gradient(145deg, #0F0F0F, #161616);
+            border-radius:12px; padding:16px; margin-bottom:18px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.6);">
+  <h2 style="color:white; margin:0 0 6px 0;">📈 Financial News Sentiment Dashboard</h2>
+  <p style="color:#F0F0F0;; font-size:20px; margin:0 0 8px 0;">
+    Combine news sentiment with market prices to spot correlations and potential market-moving headlines.
+  </p>
+  <div style="color:#BDBDBD; font-size:15px;">
+    <strong>Quick tips:</strong>
+    &nbsp;Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.
+  </div>
+</div>
+"""
+st.markdown(intro_html, unsafe_allow_html=True)
+
 # --------------------------------------------------------------------------
 
 # Data from DB
@@ -54,7 +72,7 @@ df = db.read_db(query)
 
 
 df['scraped'] = pd.to_datetime(df['scraped'], errors='coerce')
-df['scraped_time_rounded'] = df['scraped'].dt.floor('10min')
+df['scraped_time_rounded'] = df['scraped'].dt.floor('30min')
 df['scraped_time_rounded'] = df['scraped_time_rounded'] - pd.Timedelta(hours=4)
 df['scraped_time_rounded'] = df['scraped_time_rounded'].dt.tz_localize("America/New_York")
 
@@ -130,11 +148,6 @@ market_sentiment = df.groupby('scraped_time_rounded')['sentiment_score'].mean().
 market_sentiment.columns = ['scraped_time', 'avg_sentiment_score']
 # --------------------------------------------------------------------------------------
 
-# Page title and subtitle
-st.title("📈 Financial News Sentiment")
-st.subheader("Realtime sentiment, market trends, and actionable insights")
-
-# --------------------------------------------------------------------------------
 
 
 # Calculate metrics
@@ -150,7 +163,7 @@ sentiment_volatility = sentiment_24h["avg_sentiment_score"].std()
 
 # Sentiment trend over last 5 scrappings
 if len(sentiment_24h) >= 5:
-    sentiment_trend = (sentiment_24h['avg_sentiment_score'].iloc[-1] - sentiment_24h['avg_sentiment_score'].iloc[-5]) / abs(sentiment_24h['avg_sentiment_score'].iloc[-5]) * 100
+    sentiment_trend = (sentiment_24h['avg_sentiment_score'].iloc[-1] - sentiment_24h['avg_sentiment_score'].iloc[-5]) / abs(sentiment_24h['avg_sentiment_score'].iloc[-5])
 else:
     sentiment_trend = None
 
