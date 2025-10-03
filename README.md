@@ -2,7 +2,7 @@
 
 A **Python project** for scraping financial news, performing sentiment analysis, storing results in a Supabase database, and visualizing insights through a web app.  
 
-The system automatically collects fresh financial news every **6 hours**, analyzes the sentiment of each article, and stores the results in a structured database. Visualization tools then provide clear insights into market trends, helping users make more informed investment and financial decisions.  
+The system automatically collects fresh financial news at 7:30, 9:30, 12:00, 15:30, 18:00, analyzes the sentiment of each article, and stores the results in a structured database. Visualization tools then provide clear insights into market trends, helping users make more informed investment and financial decisions.  
 
 Automated scraping and scheduled updates are powered by **GitHub Actions**, ensuring the pipeline runs seamlessly without manual intervention.
 
@@ -37,8 +37,7 @@ Automated scraping and scheduled updates are powered by **GitHub Actions**, ensu
 ---
 
 ## Future Enhancements
-
-- Add support for more financial news sources (currently only 3).  
+  
 - Implement advanced NLP techniques (e.g., transformers, entity-level sentiment).  
 - Real-time sentiment dashboards with live feeds.  
 - Dockerize the app for seamless deployment.  
