@@ -1,9 +1,17 @@
+import os
+from xmlrpc import client
+
+from click import prompt
 import write2db as db
 import pandas as pd
 import streamlit as st
 import plotly.express as px
 import yfinance as yf
 import plotly.graph_objects as go
+import requests
+from huggingface_hub import InferenceClient
+import json
+import traceback
 
 
 # ------------------Streamlit layout---------------------------------------------
@@ -181,17 +189,55 @@ volatility_display = f"{sentiment_volatility:.2f}" if sentiment_volatility is no
 
 col4.metric("Sentiment Volatility", volatility_display, delta=trend_display)
 
+
+# merged = pd.merge_asof(
+#     df.sort_values("scraped_time_rounded"),
+#     stock_hist[["Close"]].sort_index(),
+#     left_on="scraped_time_rounded",
+#     right_index=True,
+#     direction="backward"
+# )
+
+# # 2️⃣ Calculate correlation
+# corr = merged["sentiment"].corr(merged["Close"])
+
+# st.metric("📊 Sentiment vs Price Correlation", f"{corr:.2f}")
 # --------------------------------------------------------------------------------
 
 # AI Insights
-st.header("AI Insights")
+st.header("💬 AI Insight")
 
 
-# Correlation with Selected Stock
-if market_sentiment['avg_sentiment_score'].notna().sum() > 5 and stock_hist['Close'].notna().sum() > 5:
-    corr = market_sentiment['avg_sentiment_score'].corr(stock_hist['Close'])
-    st.info(f"📊 Correlation between sentiment & {selected_ticker} (last {len(stock_hist)} bins): {corr:.2f}")
+prompt = f"""
+You are an AI financial assistant. Analyze the relationship between sentiment and {selected_ticker}.
 
+- Average sentiment (24h): {avg_sentiment_24h:.2f}
+- Correlation with {ticker}: {0.0:.2f}
+- Recent headlines: {df_filtered['headline'].tolist()[:5]}
+
+Please generate a short, human-readable insight (2-3 sentences).
+"""
+HF_API_KEY = os.getenv("HF_API_KEY")
+
+client = InferenceClient(
+    provider="novita",
+    api_key=HF_API_KEY,
+)
+
+completion = client.chat.completions.create(
+    model="meta-llama/Llama-3.2-3B-Instruct",
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ],
+)
+
+response = completion.choices[0].message.content.strip()
+
+st.markdown(response)
+    
 # --------------------------------------------------------------------------------
 
 # Sentiment Distribution
