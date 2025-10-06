@@ -1,6 +1,5 @@
 import os
 from xmlrpc import client
-
 from click import prompt
 import write2db as db
 import pandas as pd
@@ -8,11 +7,7 @@ import streamlit as st
 import plotly.express as px
 import yfinance as yf
 import plotly.graph_objects as go
-import requests
 from huggingface_hub import InferenceClient
-import json
-import traceback
-
 
 # ------------------Streamlit layout---------------------------------------------
     
@@ -116,13 +111,28 @@ elif  len(date_range) == 1:
     end_date   = pd.to_datetime(date_range[0]).tz_localize("America/New_York") + pd.Timedelta(days=1) - pd.Timedelta(seconds=1)
 
 # Ticker selection
-default_tickers = ["^GSPC", "QQQ", "SPY", "DIA", "AAPL", "MSFT"]
+@st.cache_data
+def load_ticker_list():
+    # Public dataset of NASDAQ-listed companies
+    url = "https://raw.githubusercontent.com/datasets/nasdaq-listings/master/data/nasdaq-listed-symbols.csv"
+    df = pd.read_csv(url)
+    df = df.rename(columns={"Symbol": "Ticker", "Company Name": "Name"})
+    return df[["Ticker", "Name"]]
 
-selected_ticker = st.sidebar.selectbox(
+# Load once and cache
+ticker_df = load_ticker_list()
+
+selected_name = st.sidebar.selectbox(
     "Select Stock / ETF to Compare",
-    options=default_tickers,
-    index=0 
+    options=["-- Select a company --"] + ticker_df["Name"].tolist(),
+    index=0
 )
+
+if selected_name == "-- Select a company --":
+    selected_ticker = "^GSPC"  # Default to S&P 500 if none selected
+else:
+    selected_ticker = ticker_df.loc[ticker_df["Name"] == selected_name, "Ticker"].iloc[0]
+
 
 # Load chosen ticker data
 ticker = yf.Ticker(selected_ticker)
@@ -144,12 +154,7 @@ stock_hist = stock_hist[
 df_filtered = df[mask]
 df = df_filtered.copy()
 
-
-
-
 # --------------------------------------------------------------------------------------
-
-
 
 # Aggregate sentiment scores over time
 market_sentiment = df.groupby('scraped_time_rounded')['sentiment_score'].mean().reset_index()
@@ -189,19 +194,17 @@ volatility_display = f"{sentiment_volatility:.2f}" if sentiment_volatility is no
 
 col4.metric("Sentiment Volatility", volatility_display, delta=trend_display)
 
+merged = pd.merge_asof(
+    stock_hist[["Datetime", "Close"]],
+    market_sentiment,
+    left_on="Datetime",
+    right_on="scraped_time"
+    )
 
-# merged = pd.merge_asof(
-#     df.sort_values("scraped_time_rounded"),
-#     stock_hist[["Close"]].sort_index(),
-#     left_on="scraped_time_rounded",
-#     right_index=True,
-#     direction="backward"
-# )
+# 2️⃣ Calculate correlation
+corr = merged["avg_sentiment_score"].corr(merged["Close"])
 
-# # 2️⃣ Calculate correlation
-# corr = merged["sentiment"].corr(merged["Close"])
-
-# st.metric("📊 Sentiment vs Price Correlation", f"{corr:.2f}")
+st.metric("📊 Sentiment vs Close (selected stock) Correlation", f"{corr:.2f}")
 # --------------------------------------------------------------------------------
 
 # AI Insights
@@ -212,8 +215,9 @@ prompt = f"""
 You are an AI financial assistant. Analyze the relationship between sentiment and {selected_ticker}.
 
 - Average sentiment (24h): {avg_sentiment_24h:.2f}
-- Correlation with {ticker}: {0.0:.2f}
+- Correlation with {selected_ticker}: {corr:.2f}
 - Recent headlines: {df_filtered['headline'].tolist()[:5]}
+- Selected stock: {selected_name} ({selected_ticker})
 
 Please generate a short, human-readable insight (2-3 sentences).
 """
