@@ -1,5 +1,4 @@
 import write2db as db
-import pandas as pd
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import nltk
 
