@@ -114,8 +114,10 @@ intro_html = """
   </div>
 </div>
 """
-st.markdown(intro_html, unsafe_allow_html=True)
-
+# st.markdown(intro_html, unsafe_allow_html=True)
+st.title("Financial News Sentiment Dashboard")
+st.write("Combine news sentiment with market prices to spot correlations and potential market-moving headlines.")
+st.write("**Quick tips:** Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.")
 # --------------------------------------------------------------------------
 
 # Data from DB
