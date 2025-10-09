@@ -21,13 +21,13 @@ st.markdown("""
     <style>
     .space-grotesk-title {
         font-family: "Space Grotesk", sans-serif !important;
-        font-weight: 600 !important;
+        font-weight: 400 !important;
         font-size: 2.5rem !important;
         font-style: normal !important;
     }
     .space-grotesk-text {
         font-family: "Space Grotesk", sans-serif !important;
-        font-weight: 400 !important;
+        font-weight: 300 !important;
         font-size: 1.05rem !important;
         font-style: normal !important;
     }
