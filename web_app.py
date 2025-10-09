@@ -20,16 +20,16 @@ st.markdown("""
     
     <style>
     .space-grotesk-title {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: "Space Grotesk", sans-serif;
         font-weight: 600;
         font-size: 2rem;
-        color: white;
+        font-style: normal;
     }
     .space-grotesk-text {
-        font-family: 'Space Grotesk', sans-serif;
+        font-family: "Space Grotesk", sans-serif;
         font-weight: 400;
         font-size: 1.05rem;
-        color: #ccc;
+        font-style: normal;
     }
     .stMetric { 
         background-color: transparent !important;   /* same as background */
