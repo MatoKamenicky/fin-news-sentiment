@@ -15,36 +15,86 @@ st.set_page_config(page_title="Financial News Sentiment", layout="wide")
 
 st.markdown("""
     <style>
-    /* Card styling */
-    .stMetric {
-        background: linear-gradient(145deg, #1E1E1E, #2A2A2A);
-        border-radius: 12px;
-        padding: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    /* Import Space Grotesk font */
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap');
+
+    html, body, [class*="css"] {
+        font-family: 'Space Grotesk', sans-serif !important;
+        color: #F5F5F5 !important;
+        background-color: #121212 !important;
     }
 
-    /* Metric value dynamic colors */
+    /* Card (metric) styling */
+    .stMetric {
+        background: linear-gradient(145deg, #1C1C1C, #252525);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Metric value styling */
+    .stMetricValue {
+        font-weight: 600 !important;
+        font-size: 1.6rem !important;
+    }
+
+    /* Metric label */
+    .stMetricLabel {
+        font-weight: 400 !important;
+        color: #BBBBBB !important;
+    }
+
+    /* Dynamic colors */
     .stMetricValuePositive .stMetricValue {
-        color: #00FF00 !important;  /* positive sentiment green */
+        color: #3EE98A !important; /* soft green */
     }
     .stMetricValueNegative .stMetricValue {
-        color: #FF5555 !important;  /* negative sentiment red */
+        color: #FF6B6B !important; /* coral red */
     }
     .stMetricValueNeutral .stMetricValue {
-        color: #AAAAAA !important;  /* neutral gray */
+        color: #C0C0C0 !important; /* neutral gray */
     }
 
-    /* Header and text accent */
-    .css-1d391kg, .stMarkdown p, .stText {
-        color: #F0F0F0 !important;
+    /* Text elements */
+    .stMarkdown, .stText, p, h1, h2, h3, h4, h5, h6 {
+        color: #F5F5F5 !important;
+        line-height: 1.6;
     }
 
-    /* Optional: buttons highlight */
+    h1, h2, h3 {
+        font-weight: 600 !important;
+        letter-spacing: 0.3px;
+    }
+
+    /* Buttons */
     .stButton button {
-        background-color: #BB33FF !important;
+        background: linear-gradient(135deg, #9747FF, #C77DFF);
         color: #FFFFFF !important;
-        border-radius: 8px;
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
     }
+
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(151, 71, 255, 0.3);
+    }
+
+    /* Streamlit containers */
+    .stApp {
+        background-color: #141414 !important; /* Slightly lighter than pure black */
+    }
+
+    /* Make everything a bit roomier */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 90%;
+    }
+
     </style>
 """, unsafe_allow_html=True)
 
@@ -256,12 +306,12 @@ fig_pie = px.pie(sentiment_counts, values="count", names="sentiment",
 
 # Plot scraped data
 fig = px.line(market_sentiment, x='scraped_time', y='avg_sentiment_score', title='Average Sentiment', markers=True)
-fig.update_traces(line=dict(color="#bb33ffa2"))
+fig.update_traces(line=dict(color="rgba(152, 5, 226, 0.61)"))
 st.plotly_chart(fig)
 
 # Plot Selected Stock
 fig = px.line(stock_hist, x="Datetime", y="Close", title=f"{selected_ticker} Closing Price", markers=True)
-fig.update_traces(line=dict(color="#0077FF"))
+fig.update_traces(line=dict(color="rgba(0, 119, 255, 0.61)"))
 st.plotly_chart(fig)
 
 # --------------------------------------------------------------------------------
@@ -270,9 +320,9 @@ st.plotly_chart(fig)
 # Combined Sentiment and Selected Stock Plot
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=market_sentiment["scraped_time"], y=market_sentiment["avg_sentiment_score"],
-                         mode="lines+markers", name="Avg Sentiment", line=dict(color="#bb33ffa2")))
+                         mode="lines+markers", name="Avg Sentiment", line=dict(color="rgba(152, 5, 226, 0.61)")))
 fig.add_trace(go.Scatter(x=stock_hist["Datetime"], y=stock_hist["Close"],
-                         mode="lines+markers", name=f"{selected_ticker} Close", yaxis="y2", line=dict(color="#0077FF")))
+                         mode="lines+markers", name=f"{selected_ticker} Close", yaxis="y2", line=dict(color="rgba(0, 119, 255, 0.61)")))
 
 fig.update_layout(title=f"Sentiment vs {selected_ticker}", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title=f"{selected_ticker} Close", overlaying="y", side="right"))
 st.plotly_chart(fig, use_container_width=True)

@@ -1,7 +1,7 @@
 [theme]
 base="dark"
-primaryColor="#bb33ffa2"            
+primaryColor="rgba(152, 5, 226, 0.61)"            
 backgroundColor="#070707bb"         
 secondaryBackgroundColor="#1E1E1E" 
 textColor="#FFFFFF"               
-font="Space Grotesk"      
+font="sans serif"
