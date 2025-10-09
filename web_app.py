@@ -15,14 +15,23 @@ st.set_page_config(page_title="Financial News Sentiment", layout="wide")
 
 st.markdown("""
     <style>
-    /* Import Space Grotesk font */
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap');
-
-    html, body, [class*="css"] {
-        font-family: 'Space Grotesk', sans-serif !important;
-        color: #F5F5F5 !important;
-        background-color: #121212 !important;
+    .space-grotesk-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 600;
+        font-size: 2rem;
+        color: white;
     }
+    .space-grotesk-text {
+        font-family: 'Space Grotesk', sans-serif;
+        font-weight: 400;
+        font-size: 1.05rem;
+        color: #ccc;
+    }
+    .stMetric { 
+        background: linear-gradient(145deg, #1E1E1E, #2A2A2A); 
+        border-radius: 12px; 
+        padding: 12px; 
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -43,9 +52,9 @@ intro_html = """
 </div>
 """
 # st.markdown(intro_html, unsafe_allow_html=True)
-st.title("Financial News Sentiment Dashboard")
-st.write("Combine news sentiment with market prices to spot correlations and potential market-moving headlines.")
-st.write("**Quick tips:** Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.")
+st.markdown('<h2 class="space-grotesk-title">Financial News Sentiment Dashboard</h2>', unsafe_allow_html=True)
+st.write('<p class="space-grotesk-text">Combine news sentiment with market prices to spot correlations and potential market-moving headlines.</p>', unsafe_allow_html=True)
+st.write('<p class="space-grotesk-text"><strong>Quick tips:</strong> Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.</p>', unsafe_allow_html=True)
 # --------------------------------------------------------------------------
 
 # Data from DB
@@ -61,7 +70,7 @@ df['scraped_time_rounded'] = df['scraped_time_rounded'].dt.tz_localize("America/
 
 df_trend = df.copy()
 # -------------------------------- Sidebar -------------------------------- 
-st.sidebar.title("🔍 Filters")
+st.sidebar.title('<p class="space-grotesk-text">Filters</p>', unsafe_allow_html=True)
 
 # Source filter
 sources = st.sidebar.multiselect(
@@ -162,7 +171,7 @@ else:
 
 
 # Display summary cards
-st.header("Summary")
+st.markdown('<h2 class="space-grotesk-title">Summary</h2>', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 col1.metric("Latest Stock Close", f"{latest_stock:.2f}")
 col2.metric("Average Sentiment (24h)", f"{avg_sentiment_24h:.2f}")
@@ -184,11 +193,12 @@ merged = pd.merge_asof(
 # Calculate correlation
 corr = merged["avg_sentiment_score"].corr(merged["Close"])
 
-st.metric("Sentiment vs Close (selected stock) Correlation", f"{corr:.2f}")
+st.metric(f"Sentiment vs {selected_name} Close Correlation", f"{corr:.2f}")
 # --------------------------------------------------------------------------------
 
 # AI Insights
-st.header("AI Insight")
+st.markdown('<h2 class="space-grotesk-title">AI Insight</h2>', unsafe_allow_html=True)
+
 
 
 prompt = f"""
@@ -240,7 +250,7 @@ fig.update_traces(line=dict(color="#615FFF"))
 st.plotly_chart(fig)
 
 # Plot Selected Stock
-fig = px.line(stock_hist, x="Datetime", y="Close", title=f"{selected_ticker} Closing Price", markers=True)
+fig = px.line(stock_hist, x="Datetime", y="Close", title=f"{selected_name} Closing Price", markers=True)
 fig.update_traces(line=dict(color="#0077FF"))
 st.plotly_chart(fig)
 
@@ -252,9 +262,9 @@ fig = go.Figure()
 fig.add_trace(go.Scatter(x=market_sentiment["scraped_time"], y=market_sentiment["avg_sentiment_score"],
                          mode="lines+markers", name="Avg Sentiment", line=dict(color="#615FFF")))
 fig.add_trace(go.Scatter(x=stock_hist["Datetime"], y=stock_hist["Close"],
-                         mode="lines+markers", name=f"{selected_ticker} Close", yaxis="y2", line=dict(color="#0077FF")))
+                         mode="lines+markers", name=f"{selected_name} Close", yaxis="y2", line=dict(color="#0077FF")))
 
-fig.update_layout(title=f"Sentiment vs {selected_ticker}", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title=f"{selected_ticker} Close", overlaying="y", side="right"))
+fig.update_layout(title=f"Sentiment vs {selected_name} Close", yaxis=dict(title="Sentiment Score"), yaxis2=dict(title=f"{selected_name} Close", overlaying="y", side="right"))
 st.plotly_chart(fig, use_container_width=True)
 # --------------------------------------------------------------------------------
 
