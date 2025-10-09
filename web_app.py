@@ -14,6 +14,10 @@ from huggingface_hub import InferenceClient
 st.set_page_config(page_title="Financial News Sentiment", layout="wide")
 
 st.markdown("""
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">       
+    
     <style>
     .space-grotesk-title {
         font-family: 'Space Grotesk', sans-serif;
@@ -28,30 +32,16 @@ st.markdown("""
         color: #ccc;
     }
     .stMetric { 
-        background: linear-gradient(145deg, #1E1E1E, #2A2A2A); 
+        background-color: transparent !important;   /* same as background */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* subtle border line */
         border-radius: 12px; 
         padding: 12px; 
-        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
 
 # Page title and subtitle
-intro_html = """
-<div style="background: linear-gradient(145deg, #0F0F0F, #161616);
-            border-radius:12px; padding:16px; margin-bottom:18px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.6);">
-  <h2 style="color:white; margin:0 0 6px 0;">Financial News Sentiment Dashboard</h2>
-  <p style="color:#F0F0F0;; font-size:20px; margin:0 0 8px 0;">
-    Combine news sentiment with market prices to spot correlations and potential market-moving headlines.
-  </p>
-  <div style="color:#BDBDBD; font-size:15px;">
-    <strong>Quick tips:</strong>
-    &nbsp;Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.
-  </div>
-</div>
-"""
-# st.markdown(intro_html, unsafe_allow_html=True)
 st.markdown('<h2 class="space-grotesk-title">Financial News Sentiment Dashboard</h2>', unsafe_allow_html=True)
 st.markdown('<p class="space-grotesk-text">Combine news sentiment with market prices to spot correlations and potential market-moving headlines.</p>', unsafe_allow_html=True)
 st.markdown('<p class="space-grotesk-text"><strong>Quick tips:</strong> Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.</p>', unsafe_allow_html=True)
