@@ -53,8 +53,8 @@ intro_html = """
 """
 # st.markdown(intro_html, unsafe_allow_html=True)
 st.markdown('<h2 class="space-grotesk-title">Financial News Sentiment Dashboard</h2>', unsafe_allow_html=True)
-st.write('<p class="space-grotesk-text">Combine news sentiment with market prices to spot correlations and potential market-moving headlines.</p>', unsafe_allow_html=True)
-st.write('<p class="space-grotesk-text"><strong>Quick tips:</strong> Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.</p>', unsafe_allow_html=True)
+st.markdown('<p class="space-grotesk-text">Combine news sentiment with market prices to spot correlations and potential market-moving headlines.</p>', unsafe_allow_html=True)
+st.markdown('<p class="space-grotesk-text"><strong>Quick tips:</strong> Use the sidebar to filter sources, sentiment, date range, and to select the stock/ETF to compare.</p>', unsafe_allow_html=True)
 # --------------------------------------------------------------------------
 
 # Data from DB
@@ -70,7 +70,7 @@ df['scraped_time_rounded'] = df['scraped_time_rounded'].dt.tz_localize("America/
 
 df_trend = df.copy()
 # -------------------------------- Sidebar -------------------------------- 
-st.sidebar.title('<p class="space-grotesk-text">Filters</p>', unsafe_allow_html=True)
+st.sidebar.header("Filters")
 
 # Source filter
 sources = st.sidebar.multiselect(
@@ -283,7 +283,7 @@ with col2:
     st.plotly_chart(fig_source, use_container_width=True)
 
 # Latest Headlines
-st.subheader("Latest Headlines")
+st.markdown("Latest Headlines")
 st.dataframe(
     df_filtered[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']]
     .sort_values("scraped", ascending=False)
