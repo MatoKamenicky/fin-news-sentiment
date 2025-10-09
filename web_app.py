@@ -54,7 +54,7 @@ intro_html = """
 <div style="background: linear-gradient(145deg, #0F0F0F, #161616);
             border-radius:12px; padding:16px; margin-bottom:18px;
             box-shadow: 0 6px 18px rgba(0,0,0,0.6);">
-  <h2 style="color:white; margin:0 0 6px 0;">📈 Financial News Sentiment Dashboard</h2>
+  <h2 style="color:white; margin:0 0 6px 0;">Financial News Sentiment Dashboard</h2>
   <p style="color:#F0F0F0;; font-size:20px; margin:0 0 8px 0;">
     Combine news sentiment with market prices to spot correlations and potential market-moving headlines.
   </p>
@@ -201,14 +201,14 @@ merged = pd.merge_asof(
     right_on="scraped_time"
     )
 
-# 2️⃣ Calculate correlation
+# Calculate correlation
 corr = merged["avg_sentiment_score"].corr(merged["Close"])
 
-st.metric("📊 Sentiment vs Close (selected stock) Correlation", f"{corr:.2f}")
+st.metric("Sentiment vs Close (selected stock) Correlation", f"{corr:.2f}")
 # --------------------------------------------------------------------------------
 
 # AI Insights
-st.header("💬 AI Insight")
+st.header("AI Insight")
 
 
 prompt = f"""
@@ -256,7 +256,7 @@ fig_pie = px.pie(sentiment_counts, values="count", names="sentiment",
 
 # Plot scraped data
 fig = px.line(market_sentiment, x='scraped_time', y='avg_sentiment_score', title='Average Sentiment', markers=True)
-fig.update_traces(line=dict(color="#BB33FF"))
+fig.update_traces(line=dict(color="#bb33ffa2"))
 st.plotly_chart(fig)
 
 # Plot Selected Stock
@@ -270,7 +270,7 @@ st.plotly_chart(fig)
 # Combined Sentiment and Selected Stock Plot
 fig = go.Figure()
 fig.add_trace(go.Scatter(x=market_sentiment["scraped_time"], y=market_sentiment["avg_sentiment_score"],
-                         mode="lines+markers", name="Avg Sentiment", line=dict(color="#BB33FF")))
+                         mode="lines+markers", name="Avg Sentiment", line=dict(color="#bb33ffa2")))
 fig.add_trace(go.Scatter(x=stock_hist["Datetime"], y=stock_hist["Close"],
                          mode="lines+markers", name=f"{selected_ticker} Close", yaxis="y2", line=dict(color="#0077FF")))
 
@@ -282,7 +282,7 @@ st.plotly_chart(fig, use_container_width=True)
 sentiment_by_source = df_filtered.groupby("source")["sentiment_score"].mean().reset_index()
 fig_source = px.bar(
     sentiment_by_source, x="source", y="sentiment_score",
-    title="📑 Average Sentiment by Source",
+    title="Average Sentiment by Source",
     color="sentiment_score", color_continuous_scale="RdYlGn"
 )
 
@@ -293,7 +293,7 @@ with col2:
     st.plotly_chart(fig_source, use_container_width=True)
 
 # Latest Headlines
-st.subheader("📰 Latest Headlines")
+st.subheader("Latest Headlines")
 st.dataframe(
     df_filtered[['scraped', 'source', 'headline', 'sentiment', 'sentiment_score']]
     .sort_values("scraped", ascending=False)
