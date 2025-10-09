@@ -1,7 +1,6 @@
 [theme]
 base="dark"
-primaryColor="rgba(152, 5, 226, 0.61)"            
-backgroundColor="#070707bb"         
+primaryColor="#615FFF"            
+backgroundColor="#070707ff"         
 secondaryBackgroundColor="#1E1E1E" 
 textColor="#FFFFFF"               
-font="sans serif"
