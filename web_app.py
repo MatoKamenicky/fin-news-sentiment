@@ -11,7 +11,7 @@ from huggingface_hub import InferenceClient
 
 # ------------------Streamlit layout---------------------------------------------
     
-st.set_page_config(page_title="Financial News Sentiment", layout="wide")
+st.set_page_config(page_title="Financial News Sentiment",  page_icon="📈", layout="wide")
 
 st.markdown("""
      <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@ st.markdown("""
     .space-grotesk-title {
         font-family: "Space Grotesk", sans-serif !important;
         font-weight: 600 !important;
-        font-size: 2rem !important;
+        font-size: 2.5rem !important;
         font-style: normal !important;
     }
     .space-grotesk-text {
@@ -33,7 +33,7 @@ st.markdown("""
     }
     .stMetric { 
         background-color: transparent !important;   /* same as background */
-        border: 1px solid rgba(255, 255, 255, 0.1); /* subtle border line */
+        border: 2px solid rgba(255, 255, 255, 0.1); /* subtle border line */
         border-radius: 12px; 
         padding: 12px; 
     }
@@ -109,6 +109,7 @@ selected_name = st.sidebar.selectbox(
 
 if selected_name == "-- Select a company --":
     selected_ticker = "^GSPC"  # Default to S&P 500 if none selected
+    selected_name = "S&P 500"
 else:
     selected_ticker = ticker_df.loc[ticker_df["Name"] == selected_name, "Ticker"].iloc[0]
 
